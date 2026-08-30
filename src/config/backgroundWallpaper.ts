@@ -2,7 +2,7 @@ import type { BackgroundWallpaperConfig } from "@/types/backgroundWallpaper";
 
 export const backgroundWallpaper: BackgroundWallpaperConfig = {
 	// 壁纸模式："banner" 横幅壁纸，"fullscreen" 全屏壁纸，"overlay" 覆盖透明，"none" 纯色背景无壁纸
-	mode: "banner",
+	mode: "overlay",
 	// 是否启用背景视频播放，配置后将在导航栏显示视频播放按钮
 	playerEnable: true,
 	/**
@@ -73,17 +73,15 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 			// 是否启用主页横幅文字
 			enable: true,
 			// 主页横幅主标题
-			title: "Lovely firefly!",
+			title: "命令的构造，交给 AI",
 			// 主页横幅主标题字体大小
 			titleSize: "4.5rem",
 			// 主页横幅副标题
 			subtitle: [
-				"In Reddened Chrysalis, I Once Rest",
-				"From Shattered Sky, I Free Fall",
-				"Amidst Silenced Stars, I Deep Sleep",
-				"Upon Lighted Fyrefly, I Soon Gaze",
-				"From Undreamt Night, I Thence Shine",
-				"In Finalized Morrow, I Full Bloom",
+				"更快，更准确",
+				"Yangnb 的随笔小站",
+				"记录思路、命令与生活",
+				"Welcome to my blog, enjoy your stay!",
 			],
 			// 主页横幅副标题字体大小
 			subtitleSize: "1.5rem",
@@ -105,20 +103,16 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 			// 图标支持 Iconify 格式：fa7-brands:github、fa7-solid:envelope、mdi:rss 等
 			links: [
 				{
-					name: "GitHub",
-					icon: "fa7-brands:github",
-					url: "https://github.com/CuteLeaf/Firefly",
+					name: "QQ",
+					icon: "fa7-brands:qq",
+					url: "tencent://message/?uin=3829189691&Menu=yes",
 					showName: true,
 				},
 				{
-					name: "Email",
-					icon: "fa7-solid:envelope",
-					url: "mailto:xiaye@msn.com",
-				},
-				{
-					name: "Sponsor",
-					icon: "material-symbols:favorite",
-					url: "https://blog.cuteleaf.cn/sponsor/",
+					name: "GitHub",
+					icon: "fa7-brands:github",
+					url: "https://github.com/Yang32-git",
+					showName: true,
 				},
 				{
 					name: "RSS",
