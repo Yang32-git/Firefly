@@ -39,5 +39,11 @@ export const profileConfig: ProfileConfig = {
 			url: "/rss/",
 			showName: false,
 		},
+		{
+			name: "discord",
+			icon: "fa7-brands:discord",
+			url: "https://discord.gg/qFsQVUfMV",
+			showName: false,
+		},
 	],
 };
