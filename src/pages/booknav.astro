@@ -22,6 +22,7 @@ const groups = getEnabledBooknavGroups();
 // 预先解析每个书签的图标与域名，避免在模板里重复计算
 const resolvedGroups = groups.map((group) => ({
 	...group,
+	locked: Boolean(group.passwordHash),
 	items: group.items.map((item) => ({
 		...item,
 		domain: getBooknavDomain(item.url),
@@ -104,6 +105,7 @@ const description =
                   id={group.id}
                   class="booknav-group mb-8 last:mb-2"
                   data-group-id={group.id}
+                  data-hash={group.passwordHash || undefined}
                 >
                   {/* 分组标题 */}
                   <div class="booknav-group-heading flex items-center gap-2 mb-3 pb-2 border-b border-(--line-divider)">
@@ -125,8 +127,41 @@ const description =
                     </div>
                   </div>
 
+                  {group.locked && (
+                    <div class="booknav-lock-panel flex flex-col items-center gap-3 py-8 px-4 rounded-xl border border-dashed border-(--line-divider) text-center">
+                      <Icon
+                        name="material-symbols:lock-rounded"
+                        class="text-4xl text-(--primary)"
+                      />
+                      <div class="text-sm text-neutral-600 dark:text-neutral-400">
+                        该分类已加密，输入密码后查看
+                      </div>
+                      <form class="flex gap-2 w-full max-w-xs" data-lock-form>
+                        <input
+                          type="password"
+                          data-lock-input
+                          placeholder="请输入密码"
+                          autocomplete="off"
+                          class="min-w-0 flex-1 px-3 py-2 rounded-lg border border-(--line-divider) bg-transparent text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:border-(--primary) focus:ring-1 focus:ring-(--primary) outline-none transition-all duration-200 text-sm"
+                        />
+                        <button
+                          type="submit"
+                          class="px-4 py-2 rounded-lg bg-(--primary) text-white dark:text-black/70 text-sm font-medium hover:opacity-90 transition-opacity"
+                        >
+                          解锁
+                        </button>
+                      </form>
+                      <div
+                        class="booknav-lock-error hidden text-sm text-red-500"
+                        data-lock-error
+                      >
+                        密码错误，请重试
+                      </div>
+                    </div>
+                  )}
+
                   {/* 书签卡片网格 */}
-                  <div class="booknav-grid">
+                  <div class="booknav-grid" hidden={group.locked} data-lock-content>
                     {group.items.map((item) => (
                       <a
                         href={item.url}
@@ -213,6 +248,7 @@ const description =
           this.handleClick = this.handleClick.bind(this);
           this.handleInput = this.handleInput.bind(this);
           this.handleIconError = this.handleIconError.bind(this);
+          this.handleSubmit = this.handleSubmit.bind(this);
         }
 
         connectedCallback() {
@@ -224,12 +260,16 @@ const description =
 
           // error 事件不冒泡，必须用捕获阶段监听图标加载失败
           this.addEventListener("error", this.handleIconError, true);
+
+          // 加密分类的解锁表单提交事件（submit 会冒泡）
+          this.addEventListener("submit", this.handleSubmit);
         }
 
         disconnectedCallback() {
           this.removeEventListener("click", this.handleClick);
           this.removeEventListener("input", this.handleInput);
           this.removeEventListener("error", this.handleIconError, true);
+          this.removeEventListener("submit", this.handleSubmit);
         }
 
         // 搜索框输入时过滤书签
@@ -247,6 +287,47 @@ const description =
           wrapper.dataset.fallback = "done";
           const letter = wrapper.dataset.letter || "?";
           wrapper.innerHTML = `<span class="booknav-letter">${letter}</span>`;
+        }
+
+        // 计算字符串的 SHA-256 十六进制哈希，用于密码比对
+        async sha256(text) {
+          const data = new TextEncoder().encode(text);
+          const buf = await crypto.subtle.digest("SHA-256", data);
+          return Array.from(new Uint8Array(buf))
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+        }
+
+        // 处理加密分类的密码解锁
+        async handleSubmit(e) {
+          const form = e.target.closest("form[data-lock-form]");
+          if (!form) return;
+          e.preventDefault();
+
+          const section = form.closest("[data-hash]");
+          const input = form.querySelector("[data-lock-input]");
+          const err = form.querySelector("[data-lock-error]");
+          const panel = form.closest(".booknav-lock-panel");
+          if (!section || !input || !err || !panel) return;
+
+          const expected = section.dataset.hash || "";
+          const value = (input.value || "").trim();
+          let ok = false;
+          try {
+            ok = (await this.sha256(value)) === expected;
+          } catch {
+            ok = false;
+          }
+
+          if (ok) {
+            panel.hidden = true;
+            const content = section.querySelector("[data-lock-content]");
+            if (content) content.hidden = false;
+          } else {
+            err.hidden = false;
+            input.value = "";
+            input.focus();
+          }
         }
 
         // 点击分类胶囊平滑滚动到对应分组

@@ -23,6 +23,9 @@ export type BooknavGroup = {
 	desc?: string; // 分组描述
 	weight?: number; // 分组权重，数字越大排序越靠前，默认 0
 	enabled?: boolean; // 是否启用，默认 true
+	// 分组访问密码的 SHA-256 哈希（小写十六进制）。设置后该分组需输入正确密码才能查看。
+	// 生成哈希：node -e "console.log(require('crypto').createHash('sha256').update('你的密码').digest('hex'))"
+	passwordHash?: string;
 	items: BooknavItem[]; // 分组内的书签列表
 };
 
